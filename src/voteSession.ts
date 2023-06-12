@@ -29,18 +29,22 @@ export class VoteSession {
             embeds: this.makeEmbeds(),
             components: [{
                 type: ComponentType.ActionRow,
-                components: this._options.map((option, index) => {
-                    return {
-                        type: ComponentType.Button,
-                        label: option.name,
-                        style: ButtonStyle.Primary,
-                        customId: this._id + index
-                    }
-                })
+                components: this.makeButtons()
             }]
         });
 
         this._client.on("interactionCreate", this.interactionHandler);
+    }
+
+    private makeButtons(): { style: any; label: string; type: any; customId: string }[] {
+        return this._options.map((option, index) => {
+            return {
+                type: ComponentType.Button,
+                label: option.name,
+                style: ButtonStyle.Primary,
+                customId: this._id + index
+            }
+        });
     }
 
     private interactionHandler = async (interaction: Interaction) => {
@@ -77,6 +81,17 @@ export class VoteSession {
         this._options[index].voters.push(user);
     }
 
+    private makeEmbeds() {
+        return [{
+            title: "투표",
+            description: `투표가 시작되었습니다!`,
+            fields: [...this.generateVotersFields(), {
+                name: "총 투표 수",
+                value: `${this.totalVoteCount()}표!`,
+            }]
+        }]
+    }
+
     public async end() {
         if (this._message === null) {
             throw new Error("VoteSession is not started!");
@@ -86,36 +101,16 @@ export class VoteSession {
             embeds: [{
                 title: "투표",
                 description: `투표가 종료되었습니다!`,
-                fields: [...this._options.map((option) => {
-                    return {
-                        name: option.name,
-                        value: `${option.voters.length}표!`,
-                        inline: true
-                    }
-                }), {
+                fields: [...this.generateVotersFields(), {
+                    name: "총 투표 수",
+                    value: `${this.totalVoteCount()}표!`,
+                }, {
                     name: "우승자",
                     value: this.getWinner(),
                 }]
             }],
             components: []
         });
-    }
-
-    private makeEmbeds() {
-        return [{
-            title: "투표",
-            description: `투표가 시작되었습니다!`,
-            fields: [...this._options.map((option) => {
-                return {
-                    name: option.name,
-                    value: `${option.voters.length}표!`,
-                    inline: true
-                }
-            }), {
-                name: "총 투표 수",
-                value: `${this.totalVoteCount()}표!`,
-            }]
-        }]
     }
 
     private getWinner() {
@@ -132,22 +127,6 @@ export class VoteSession {
         return winner;
     }
 
-    public get id(): string {
-        return this._id;
-    }
-
-    private async updateEmbeds() {
-        if (this._message === null) {
-            throw new Error("VoteSession is not started!");
-        }
-
-        const embed = this.makeEmbeds();
-
-        await this._message.edit({
-            embeds: embed,
-        });
-    }
-
     private totalVoteCount() {
         let total = 0;
 
@@ -156,5 +135,15 @@ export class VoteSession {
         }
 
         return total;
+    }
+
+    private generateVotersFields() {
+        return this._options.map((option) => {
+            return {
+                name: option.name,
+                value: `${option.voters.length}표!`,
+                inline: true
+            }
+        })
     }
 }
