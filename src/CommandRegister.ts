@@ -12,20 +12,32 @@ const command = [
                 .setDescription('투표를 시작합니다.')
                 .addStringOption(option =>
                     option
-                        .setName('참가자1')
-                        .setDescription('참가자 1의 이름을 입력하세요.')
+                        .setName('옵션1')
+                        .setDescription('옵션 1의 이름을 입력하세요.')
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
-                        .setName('참가자2')
-                        .setDescription('참가자 2의 이름을 입력하세요.')
+                        .setName('옵션2')
+                        .setDescription('옵션 2의 이름을 입력하세요.')
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
-                        .setName('참가자3')
-                        .setDescription('참가자 3의 이름을 입력하세요.')
+                        .setName('옵션3')
+                        .setDescription('옵션 3의 이름을 입력하세요.')
+                        .setRequired(false)
+                )
+                .addStringOption(option =>
+                    option
+                        .setName('옵션4')
+                        .setDescription('옵션 4의 이름을 입력하세요.')
+                        .setRequired(false)
+                )
+                .addStringOption(option =>
+                    option
+                        .setName('옵션5')
+                        .setDescription('옵션 5의 이름을 입력하세요.')
                         .setRequired(false)
                 )
         )

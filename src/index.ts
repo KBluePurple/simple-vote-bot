@@ -46,20 +46,15 @@ async function handleVoteCommand(interaction: CommandInteraction) {
         }
 
         const voteOptions = [];
-        voteOptions.push({
-            name: options.getString("참가자1")!,
-            voters: [],
-        });
-        voteOptions.push({
-            name: options.getString("참가자2")!,
-            voters: [],
-        });
-
-        if (options.getString("참가자3") !== null)
+        for (let i = 0; i < 5; i++)
+        {
+            const option = options.getString(`옵션${i + 1}`);
+            if (option === null) break;
             voteOptions.push({
-                name: options.getString("참가자3"),
+                name: option,
                 voters: [],
             });
+        }
 
         const voteSession = new VoteSession(voteOptions, interaction.client);
 
@@ -86,4 +81,13 @@ async function handleVoteCommand(interaction: CommandInteraction) {
 
 process.on("uncaughtException", (err) => {
     console.error(err);
+});
+
+process.on("SIGINT", async () => {
+    console.log(`${sessionMap.size} VoteSessions are ending...`);
+    for (const session of sessionMap.values()) {
+        await session.end();
+    }
+    console.log( "Gracefully shutting down from SIGINT (Ctrl-C)" );
+    process.exit(0);
 });
