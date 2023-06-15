@@ -43,19 +43,23 @@ async function handleVoteCommand(interaction: CommandInteraction) {
             throw new Error("VoteSession is already started!");
         }
 
-        const option1 = options.getString("참가자1") as string;
-        const option2 = options.getString("참가자2") as string;
+        const voteOptions = [];
+        voteOptions.push({
+            name: options.getString("참가자1")!,
+            voters: [],
+        });
+        voteOptions.push({
+            name: options.getString("참가자2")!,
+            voters: [],
+        });
 
-        const voteSession = new VoteSession([
-            {
-                name: option1,
-                voters: []
-            },
-            {
-                name: option2,
-                voters: []
-            }
-        ], interaction.client);
+        if (options.getString("참가자3") !== null)
+            voteOptions.push({
+                name: options.getString("참가자3"),
+                voters: [],
+            });
+
+        const voteSession = new VoteSession(voteOptions, interaction.client);
 
         await voteSession.start(interaction.channel);
         sessionMap.set(interaction.channel, voteSession);

@@ -22,6 +22,12 @@ const command = [
                         .setDescription('참가자 2의 이름을 입력하세요.')
                         .setRequired(true)
                 )
+                .addStringOption(option =>
+                    option
+                        .setName('참가자3')
+                        .setDescription('참가자 3의 이름을 입력하세요.')
+                        .setRequired(false)
+                )
         )
         .addSubcommand(subcommand =>
             subcommand

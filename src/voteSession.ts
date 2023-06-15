@@ -43,11 +43,16 @@ export class VoteSession {
         if (interaction.isButton() && interaction.customId.startsWith(this._id)) {
             const index = parseInt(interaction.customId.replace(this._id, ""));
 
-            await this.vote(index, interaction.user);
-
-            await interaction.update({
-                embeds: this.getEmbeds(),
-            });
+            try {
+                await this.vote(index, interaction.user);
+                await interaction.update({
+                    embeds: this.getEmbeds(),
+                });
+            } catch (e: any) {
+                await interaction.reply({
+                    content: e.message,
+                });
+            }
         }
     }
 
