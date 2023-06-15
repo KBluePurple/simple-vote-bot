@@ -13,6 +13,9 @@ export class VoteSession {
     private _client: Client;
     private _interactionId: string | null = null;
 
+    private _embedCache: any = null;
+    private _buttonCache: any = null;
+
     constructor(options: VoteOption[], client: Client) {
         this._id = uuidv4();
         this._options = options;
@@ -26,25 +29,14 @@ export class VoteSession {
 
         this._interactionId = channel.guild.id + channel.id + this._id;
         this._message = await channel.send({
-            embeds: this.makeEmbeds(),
+            embeds: this.getEmbeds(),
             components: [{
                 type: ComponentType.ActionRow,
-                components: this.makeButtons()
+                components: this.getButtons()
             }]
         });
 
         this._client.on("interactionCreate", this.interactionHandler);
-    }
-
-    private makeButtons(): { style: any; label: string; type: any; customId: string }[] {
-        return this._options.map((option, index) => {
-            return {
-                type: ComponentType.Button,
-                label: option.name,
-                style: ButtonStyle.Primary,
-                customId: this._id + index
-            }
-        });
     }
 
     private interactionHandler = async (interaction: Interaction) => {
@@ -54,7 +46,7 @@ export class VoteSession {
             await this.vote(index, interaction.user);
 
             await interaction.update({
-                embeds: this.makeEmbeds(),
+                embeds: this.getEmbeds(),
             });
         }
     }
@@ -79,17 +71,6 @@ export class VoteSession {
         }
 
         this._options[index].voters.push(user);
-    }
-
-    private makeEmbeds() {
-        return [{
-            title: "투표",
-            description: `투표가 시작되었습니다!`,
-            fields: [...this.generateVotersFields(), {
-                name: "총 투표 수",
-                value: `${this.totalVoteCount()}표!`,
-            }]
-        }]
     }
 
     public async end() {
@@ -145,5 +126,31 @@ export class VoteSession {
                 inline: true
             }
         })
+    }
+
+    private getButtons(): { style: any; label: string; type: any; customId: string }[] {
+        if (this._buttonCache !== null) {
+            return this._buttonCache;
+        }
+
+        return this._buttonCache = this._options.map((option, index) => {
+            return {
+                type: ComponentType.Button,
+                label: option.name,
+                style: ButtonStyle.Primary,
+                customId: this._id + index
+            }
+        });
+    }
+
+    private getEmbeds() {
+        return this._embedCache = [{
+            title: "투표",
+            description: `투표가 시작되었습니다!`,
+            fields: [...this.generateVotersFields(), {
+                name: "총 투표 수",
+                value: `${this.totalVoteCount()}표!`,
+            }]
+        }];
     }
 }

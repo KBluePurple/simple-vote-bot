@@ -77,3 +77,7 @@ async function handleVoteCommand(interaction: CommandInteraction) {
         await interaction.reply({content: "투표를 종료합니다.", ephemeral: true});
     }
 }
+
+process.on("uncaughtException", (err) => {
+    console.error(err);
+});
