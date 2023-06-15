@@ -3,6 +3,8 @@ import {Config} from "./Config";
 import {registerCommands} from "./CommandRegister";
 import {VoteSession} from "./voteSession";
 
+const token = process.env.TOKEN || Config.token;
+
 const sessionMap = new Map<TextBasedChannel, VoteSession>();
 
 (async () => {
@@ -20,7 +22,7 @@ const sessionMap = new Map<TextBasedChannel, VoteSession>();
 
     client.on("interactionCreate", onInteraction);
 
-    await client.login(Config.token);
+    await client.login(token);
     console.log("Logged in!");
 })();
 

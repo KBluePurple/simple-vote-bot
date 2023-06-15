@@ -36,12 +36,15 @@ const command = [
         )
 ]
 
-const rest = new REST({version: '10'}).setToken(Config.token);
+const token = process.env.TOKEN || Config.token;
+const clientId = process.env.CLIENT_ID || Config.clientId;
+
+const rest = new REST({version: '10'}).setToken(token);
 
 export async function registerCommands() {
     try {
         await rest.put(
-            Routes.applicationCommands(Config.clientId),
+            Routes.applicationCommands(clientId),
             {body: command},
         );
 
