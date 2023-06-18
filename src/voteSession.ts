@@ -1,9 +1,23 @@
 import {v4 as uuidv4} from 'uuid';
-import {ButtonStyle, Channel, Client, ComponentType, Interaction, Message, TextChannel, User} from "discord.js";
+import {
+    BaseGuildTextChannel,
+    ButtonStyle,
+    Channel,
+    Client,
+    ComponentType,
+    Interaction,
+    Message,
+    User
+} from "discord.js";
+import * as fs from "fs";
 
 type VoteOption = {
     name: string;
     voters: User[];
+}
+
+if (!fs.existsSync("hitCount.json")) {
+    fs.writeFileSync("hitCount.json", "{}");
 }
 
 export class VoteSession {
@@ -23,7 +37,7 @@ export class VoteSession {
     }
 
     public async start(channel: Channel): Promise<void> {
-        if (!(channel instanceof TextChannel)) {
+        if (!(channel instanceof BaseGuildTextChannel)) {
             throw new Error("Channel is not a text channel!");
         }
 
@@ -37,11 +51,13 @@ export class VoteSession {
         });
 
         this._client.on("interactionCreate", this.interactionHandler);
+        console.log(`VoteSession ${this._id} started!`);
     }
 
     private interactionHandler = async (interaction: Interaction) => {
         if (interaction.isButton() && interaction.customId.startsWith(this._id)) {
             const index = parseInt(interaction.customId.replace(this._id, ""));
+            console.log(`VoteSession ${this._id} received interaction from ${interaction.user.username}!`);
 
             try {
                 await this.vote(index, interaction.user);
@@ -97,6 +113,10 @@ export class VoteSession {
             }],
             components: []
         });
+
+        this._client.off("interactionCreate", this.interactionHandler);
+
+        console.log(`VoteSession ${this._id} ended!`)
     }
 
     private getWinner() {
