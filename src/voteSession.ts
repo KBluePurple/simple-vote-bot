@@ -13,7 +13,7 @@ import * as fs from "fs";
 
 type VoteOption = {
     name: string;
-    voters: User[];
+    voters: string[];
 }
 
 if (!fs.existsSync("hitCount.json")) {
@@ -57,7 +57,6 @@ export class VoteSession {
     private interactionHandler = async (interaction: Interaction) => {
         if (interaction.isButton() && interaction.customId.startsWith(this._id)) {
             const index = parseInt(interaction.customId.replace(this._id, ""));
-            console.log(`VoteSession ${this._id} received interaction from ${interaction.user.username}!`);
 
             try {
                 await this.vote(index, interaction.user);
@@ -69,6 +68,8 @@ export class VoteSession {
                     content: e.message,
                 });
             }
+
+            console.log(`${this._id} ${interaction.user.username} voted ${index}. ${this.totalVoteCount()} votes!`);
         }
     }
 
@@ -77,21 +78,17 @@ export class VoteSession {
             throw new Error("VoteSession is not started!");
         }
 
-        const alreadyVoted = this._options.some((option) => {
-            return option.voters.some((voter) => {
-                return voter.id === user.id;
-            });
-        });
+        this.clearVote(user);
+        this._options[index].voters.push(user.id);
+    }
 
-        if (alreadyVoted) {
-            this._options.forEach((option) => {
-                option.voters = option.voters.filter((voter) => {
-                    return voter.id !== user.id;
-                });
-            });
+    public clearVote(user: User) {
+        for (const option of this._options) {
+            const index = option.voters.indexOf(user.id);
+            if (index !== -1) {
+                option.voters.splice(index, 1);
+            }
         }
-
-        this._options[index].voters.push(user);
     }
 
     public async end() {
