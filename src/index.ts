@@ -76,6 +76,7 @@ async function handleVoteCommand(interaction: CommandInteraction) {
 
         await voteSession.end();
         await interaction.reply({content: "투표를 종료합니다.", ephemeral: true});
+        sessionMap.delete(interaction.channel);
     }
 }
 
