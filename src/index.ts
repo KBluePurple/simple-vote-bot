@@ -2,14 +2,15 @@ import {Client, CommandInteraction, GatewayIntentBits, GuildChannel, Interaction
 import {Config} from "./Config";
 import {registerCommands} from "./CommandRegister";
 import {VoteSession} from "./voteSession";
+import { Logger, ILogObj } from "tslog";
+
+const log: Logger<ILogObj> = new Logger();
 
 const token = process.env.TOKEN || Config.token;
 
 const sessionMap = new Map<TextBasedChannel, VoteSession>();
 
 (async () => {
-    await registerCommands();
-    console.log("Registered commands!")
 
     const intents = [
         GatewayIntentBits.Guilds,
@@ -21,15 +22,20 @@ const sessionMap = new Map<TextBasedChannel, VoteSession>();
     });
 
     client.on("interactionCreate", onInteraction);
+    client.on("error", (error) => {
+        log.error(error);
+    });
 
     await client.login(token);
-    console.log("Logged in!");
+    log.info(`Logged in as ${client.user?.tag}!`);
 })();
 
 async function onInteraction(interaction: Interaction) {
     if (interaction.isCommand()) {
         if (interaction.commandName === "투표") {
             await handleVoteCommand(interaction);
+        } else if (interaction.commandName === "디버그") {
+            await handleDebugCommand(interaction);
         }
     }
 }
@@ -80,15 +86,32 @@ async function handleVoteCommand(interaction: CommandInteraction) {
     }
 }
 
+async function handleDebugCommand(interaction: CommandInteraction) {
+    const options: any = interaction.options;
+    const index: number = options.getInteger("숫자");
+
+    if (interaction.user.id != "292200792939560970") return;
+
+    if (index === 0) // get all permissions
+    {
+        const permissions = interaction.guild?.members.cache.get(interaction.client.user?.id)?.permissions;
+        if (permissions === undefined) return;
+
+        const permissionsArray = permissions.toArray();
+        const permissionsString = permissionsArray.join(",\n");
+        await interaction.reply({content: permissionsString, ephemeral: true});
+    }
+}
+
 process.on("uncaughtException", (err) => {
-    console.error(err);
+    log.fatal(err);
 });
 
 process.on("SIGINT", async () => {
-    console.log(`${sessionMap.size} VoteSessions are ending...`);
+    log.info(`${sessionMap.size} VoteSessions are ending...`);
     for (const session of sessionMap.values()) {
         await session.end();
     }
-    console.log( "Gracefully shutting down from SIGINT (Ctrl-C)" );
+    log.info( "Gracefully shutting down from SIGINT (Ctrl-C)" );
     process.exit(0);
 });

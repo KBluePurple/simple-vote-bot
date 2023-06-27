@@ -10,11 +10,14 @@ import {
     User
 } from "discord.js";
 import * as fs from "fs";
+import { Logger, ILogObj } from "tslog";
 
 type VoteOption = {
     name: string;
     voters: string[];
 }
+
+const log: Logger<ILogObj> = new Logger();
 
 if (!fs.existsSync("hitCount.json")) {
     fs.writeFileSync("hitCount.json", "{}");
@@ -51,7 +54,7 @@ export class VoteSession {
         });
 
         this._client.on("interactionCreate", this.interactionHandler);
-        console.log(`VoteSession ${this._id} started!`);
+        log.info(`VoteSession ${this._id} started!`);
     }
 
     private interactionHandler = async (interaction: Interaction) => {
@@ -69,7 +72,7 @@ export class VoteSession {
                 });
             }
 
-            console.log(`${this._id} ${interaction.user.username} voted ${index}. ${this.totalVoteCount()} votes!`);
+            log.info(`${this._id} ${interaction.user.username} voted ${index}. ${this.totalVoteCount()} votes!`);
         }
     }
 
@@ -96,6 +99,10 @@ export class VoteSession {
             throw new Error("VoteSession is not started!");
         }
 
+        if (!this._message.editable) {
+            throw new Error(`VoteSession ${this._id} is not editable!`);
+        }
+
         await this._message.edit({
             embeds: [{
                 title: "투표",
@@ -113,7 +120,7 @@ export class VoteSession {
 
         this._client.off("interactionCreate", this.interactionHandler);
 
-        console.log(`VoteSession ${this._id} ended!`)
+        log.info(`VoteSession ${this._id} ended!`)
     }
 
     private getWinner() {

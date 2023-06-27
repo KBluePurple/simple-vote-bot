@@ -1,5 +1,8 @@
 import {PermissionFlagsBits, REST, Routes, SlashCommandBuilder} from "discord.js";
 import {Config} from "./Config";
+import { Logger, ILogObj } from "tslog";
+
+const log: Logger<ILogObj> = new Logger();
 
 const command = [
     new SlashCommandBuilder()
@@ -45,6 +48,15 @@ const command = [
             subcommand
                 .setName('종료')
                 .setDescription('투표를 종료합니다.')
+        ),
+    new SlashCommandBuilder()
+        .setName('디버그')
+        .setDescription('디버그 명령어')
+        .addIntegerOption(option =>
+            option
+                .setName('숫자')
+                .setDescription('숫자를 입력하세요.')
+                .setRequired(true)
         )
 ]
 
@@ -60,8 +72,8 @@ export async function registerCommands() {
             {body: command},
         );
 
-        console.log('Successfully registered application commands.');
+        log.info('Successfully registered application commands.');
     } catch (error) {
-        console.error(error);
+        log.error(error);
     }
 }
