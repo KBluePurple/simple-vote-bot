@@ -28,9 +28,7 @@ export class VoteSession {
     private readonly _options: VoteOption[];
     private _message: Message | null = null;
     private _client: Client;
-    private _interactionId: string | null = null;
-
-    private _embedCache: any = null;
+    // private _interactionId: string | null = null;
     private _buttonCache: any = null;
 
     constructor(options: VoteOption[], client: Client) {
@@ -44,7 +42,7 @@ export class VoteSession {
             throw new Error("Channel is not a text channel!");
         }
 
-        this._interactionId = channel.guild.id + channel.id + this._id;
+        // this._interactionId = channel.guild.id + channel.id + this._id;
         this._message = await channel.send({
             embeds: this.getEmbeds(),
             components: [{
@@ -173,7 +171,7 @@ export class VoteSession {
     }
 
     private getEmbeds() {
-        return this._embedCache = [{
+        return [{
             title: "투표",
             description: `투표가 시작되었습니다!`,
             fields: [...this.generateVotersFields(), {

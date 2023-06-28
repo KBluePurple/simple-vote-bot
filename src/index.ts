@@ -1,6 +1,6 @@
 import {Client, CommandInteraction, GatewayIntentBits, GuildChannel, Interaction, TextBasedChannel} from "discord.js";
 import {Config} from "./Config";
-import {registerCommands} from "./CommandRegister";
+// import {registerCommands} from "./CommandRegister";
 import {VoteSession} from "./voteSession";
 import { Logger, ILogObj } from "tslog";
 
@@ -11,7 +11,6 @@ const token = process.env.TOKEN || Config.token;
 const sessionMap = new Map<TextBasedChannel, VoteSession>();
 
 (async () => {
-
     const intents = [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildIntegrations,
